@@ -149,7 +149,7 @@ export const Draggable = Evented.extend({
 
 			this._moved = true;
 
-			document.body.classList.add('leaflet-dragging');
+			// document.body.classList.add('leaflet-dragging');
 
 			this._lastTarget = e.target || e.srcElement;
 			// IE and Edge do not give the <use> element, so fetch it
@@ -189,7 +189,7 @@ export const Draggable = Evented.extend({
 	},
 
 	finishDrag(noInertia) {
-		document.body.classList.remove('leaflet-dragging');
+		// document.body.classList.remove('leaflet-dragging');
 
 		if (this._lastTarget) {
 			this._lastTarget.classList.remove('leaflet-drag-target');
