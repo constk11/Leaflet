@@ -3,35 +3,34 @@ layout: tutorial_frame
 title: Watermark control
 ---
 <script type='text/javascript'>
-	const map = L.map('map', {
+	var map = L.map('map', {
 		center: [40, 0],
 		zoom: 1
 	});
 
-	const osm = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
-		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	var positron = L.tileLayer('https://{s}.basemaps.cartocdn.com/light_all/{z}/{x}/{y}.png', {
+		attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors, &copy; <a href="https://carto.com/attribution">CARTO</a>'
 	}).addTo(map);
 
 	L.Control.Watermark = L.Control.extend({
-		onAdd(map) {
-			const img = L.DomUtil.create('img');
-
+		onAdd: function(map) {
+			var img = L.DomUtil.create('img');
+			
 			img.src = '../../docs/images/logo.png';
 			img.style.width = '200px';
-
+			
 			return img;
 		},
-
-		onRemove(map) {
+		
+		onRemove: function(map) {
 			// Nothing to do here
 		}
 	});
 
-	L.control.watermark = function (opts) {
+	L.control.watermark = function(opts) {
 		return new L.Control.Watermark(opts);
-	};
+	}
 	
-	const watermarkControl = L.control.watermark({position: 'bottomleft'}).addTo(map);
-
+	L.control.watermark({ position: 'bottomleft' }).addTo(map);
+	
 </script>

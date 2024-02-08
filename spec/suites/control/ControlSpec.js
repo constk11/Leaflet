@@ -1,55 +1,52 @@
-import {DomUtil, Map, Control} from 'leaflet';
-import {createContainer, removeMapContainer} from '../SpecHelper.js';
-
-describe('Control', () => {
+describe("Control", function () {
 	function onAdd() {
-		return DomUtil.create('div', 'leaflet-test-control');
+		return L.DomUtil.create('div', 'leaflet-test-control');
 	}
 
-	let map,
+	var map,
 	    container,
 	    control;
 
-	beforeEach(() => {
-		container = container = createContainer();
-		map = new Map(container);
-
-		map.setView([0, 0], 1);
-		control = new Control();
+	beforeEach(function () {
+		container = document.createElement('div');
+		document.body.appendChild(container);
+		map = L.map(container).setView([0, 0], 1);
+		control = new L.Control();
 		control.onAdd = onAdd;
 		control.addTo(map);
 	});
 
-	afterEach(() => {
-		removeMapContainer(map, container);
+	afterEach(function () {
+		map.remove();
+		document.body.removeChild(container);
 	});
 
-	describe('#addTo', () => {
-		it('adds the container to the map', () => {
+	describe("#addTo", function () {
+		it("adds the container to the map", function () {
 			expect(map.getContainer().querySelector('.leaflet-test-control')).to.equal(control.getContainer());
 		});
 
-		it('removes the control from any existing map', () => {
+		it("removes the control from any existing map", function () {
 			control.addTo(map);
 			expect(map.getContainer().querySelectorAll('.leaflet-test-control').length).to.equal(1);
 			expect(map.getContainer().querySelector('.leaflet-test-control')).to.equal(control.getContainer());
 		});
 	});
 
-	describe('#remove', () => {
-		it('removes the container from the map', () => {
+	describe("#remove", function () {
+		it("removes the container from the map", function () {
 			control.remove();
 			expect(map.getContainer().querySelector('.leaflet-test-control')).to.equal(null);
 		});
 
-		it('calls onRemove if defined', () => {
+		it("calls onRemove if defined", function () {
 			control.onRemove = sinon.spy();
 			control.remove();
-			expect(control.onRemove.called).to.be.true;
+			expect(control.onRemove.called).to.be(true);
 		});
 
-		it('is a no-op if the control has not been added', () => {
-			const control = new Control();
+		it("is a no-op if the control has not been added", function () {
+			var control = new L.Control();
 			expect(control.remove()).to.equal(control);
 		});
 	});

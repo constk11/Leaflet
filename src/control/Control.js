@@ -1,8 +1,8 @@
 
-import {Class} from '../core/Class.js';
-import {Map} from '../map/Map.js';
-import * as Util from '../core/Util.js';
-import * as DomUtil from '../dom/DomUtil.js';
+import {Class} from '../core/Class';
+import {Map} from '../map/Map';
+import * as Util from '../core/Util';
+import * as DomUtil from '../dom/DomUtil';
 
 /*
  * @class Control
@@ -13,9 +13,9 @@ import * as DomUtil from '../dom/DomUtil.js';
  * All other controls extend from this class.
  */
 
-export const Control = Class.extend({
+export var Control = Class.extend({
 	// @section
-	// @aka Control Options
+	// @aka Control options
 	options: {
 		// @option position: String = 'topright'
 		// The position of the control (one of the map corners). Possible values are `'topleft'`,
@@ -23,7 +23,7 @@ export const Control = Class.extend({
 		position: 'topright'
 	},
 
-	initialize(options) {
+	initialize: function (options) {
 		Util.setOptions(this, options);
 	},
 
@@ -33,14 +33,14 @@ export const Control = Class.extend({
 	 * @method getPosition: string
 	 * Returns the position of the control.
 	 */
-	getPosition() {
+	getPosition: function () {
 		return this.options.position;
 	},
 
 	// @method setPosition(position: string): this
 	// Sets the position of the control.
-	setPosition(position) {
-		const map = this._map;
+	setPosition: function (position) {
+		var map = this._map;
 
 		if (map) {
 			map.removeControl(this);
@@ -57,23 +57,23 @@ export const Control = Class.extend({
 
 	// @method getContainer: HTMLElement
 	// Returns the HTMLElement that contains the control.
-	getContainer() {
+	getContainer: function () {
 		return this._container;
 	},
 
 	// @method addTo(map: Map): this
 	// Adds the control to the given map.
-	addTo(map) {
+	addTo: function (map) {
 		this.remove();
 		this._map = map;
 
-		const container = this._container = this.onAdd(map),
+		var container = this._container = this.onAdd(map),
 		    pos = this.getPosition(),
 		    corner = map._controlCorners[pos];
 
-		container.classList.add('leaflet-control');
+		DomUtil.addClass(container, 'leaflet-control');
 
-		if (pos.includes('bottom')) {
+		if (pos.indexOf('bottom') !== -1) {
 			corner.insertBefore(container, corner.firstChild);
 		} else {
 			corner.appendChild(container);
@@ -86,12 +86,12 @@ export const Control = Class.extend({
 
 	// @method remove: this
 	// Removes the control from the map it is currently active on.
-	remove() {
+	remove: function () {
 		if (!this._map) {
 			return this;
 		}
 
-		this._container.remove();
+		DomUtil.remove(this._container);
 
 		if (this.onRemove) {
 			this.onRemove(this._map);
@@ -103,7 +103,7 @@ export const Control = Class.extend({
 		return this;
 	},
 
-	_refocusOnMap(e) {
+	_refocusOnMap: function (e) {
 		// if map exists and event is not a keyboard event
 		if (this._map && e && e.screenX > 0 && e.screenY > 0) {
 			this._map.getContainer().focus();
@@ -111,7 +111,7 @@ export const Control = Class.extend({
 	}
 });
 
-export const control = function (options) {
+export var control = function (options) {
 	return new Control(options);
 };
 
@@ -133,26 +133,26 @@ export const control = function (options) {
 Map.include({
 	// @method addControl(control: Control): this
 	// Adds the given control to the map
-	addControl(control) {
+	addControl: function (control) {
 		control.addTo(this);
 		return this;
 	},
 
 	// @method removeControl(control: Control): this
 	// Removes the given control from the map
-	removeControl(control) {
+	removeControl: function (control) {
 		control.remove();
 		return this;
 	},
 
-	_initControlPos() {
-		const corners = this._controlCorners = {},
+	_initControlPos: function () {
+		var corners = this._controlCorners = {},
 		    l = 'leaflet-',
 		    container = this._controlContainer =
-		            DomUtil.create('div', `${l}control-container`, this._container);
+		            DomUtil.create('div', l + 'control-container', this._container);
 
 		function createCorner(vSide, hSide) {
-			const className = `${l + vSide} ${l}${hSide}`;
+			var className = l + vSide + ' ' + l + hSide;
 
 			corners[vSide + hSide] = DomUtil.create('div', className, container);
 		}
@@ -163,13 +163,11 @@ Map.include({
 		createCorner('bottom', 'right');
 	},
 
-	_clearControlPos() {
-		for (const i in this._controlCorners) {
-			if (Object.hasOwn(this._controlCorners, i)) {
-				this._controlCorners[i].remove();
-			}
+	_clearControlPos: function () {
+		for (var i in this._controlCorners) {
+			DomUtil.remove(this._controlCorners[i]);
 		}
-		this._controlContainer.remove();
+		DomUtil.remove(this._controlContainer);
 		delete this._controlCorners;
 		delete this._controlContainer;
 	}

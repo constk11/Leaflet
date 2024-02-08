@@ -1,85 +1,155 @@
-/* eslint-env node */
-// See: https://karma-runner.github.io/latest/config/configuration-file.html
-module.exports = function (/** @type {import('karma').Config} */ config) {
-	const isCoverageEnabled = process.argv.includes('--coverage');
+var json = require('rollup-plugin-json');
 
-	const karmaConfig = {
+const outro = `var oldL = window.L;
+exports.noConflict = function() {
+	window.L = oldL;
+	return this;
+}
+
+// Always export us to window global (see #2364)
+window.L = exports;`;
+
+// Karma configuration
+module.exports = function (config) {
+
+// 	var libSources = require(__dirname + '/../build/build.js').getFiles();
+
+	var files = [
+		"spec/before.js",
+		"src/Leaflet.js",
+		"spec/after.js",
+		"node_modules/happen/happen.js",
+		"node_modules/prosthetic-hand/dist/prosthetic-hand.js",
+		"spec/suites/SpecHelper.js",
+		"spec/suites/**/*.js",
+		"dist/*.css",
+		{pattern: "dist/images/*.png", included: false, serve: true}
+	];
+
+	var preprocessors = {};
+
+	preprocessors['src/Leaflet.js'] = ['rollup'];
+
+	config.set({
+		// base path, that will be used to resolve files and exclude
 		basePath: '../',
+
 		plugins: [
+			'karma-rollup-preprocessor',
 			'karma-mocha',
 			'karma-sinon',
-			'karma-chai',
+			'karma-expect',
+			'karma-phantomjs-launcher',
+			'karma-edge-launcher',
+			'karma-ie-launcher',
 			'karma-chrome-launcher',
-			'karma-safarinative-launcher',
-			'karma-firefox-launcher',
-			'karma-time-stats-reporter'
-		],
-		frameworks: ['mocha', 'sinon', 'chai'],
-		customContextFile: 'spec/context.html',
-		customDebugFile: 'spec/debug.html',
-		files: [
-			{pattern: 'node_modules/ui-event-simulator/**/*.js', included: false, served: true},
-			{pattern: 'node_modules/prosthetic-hand/**/*.js', included: false, served: true},
-			{pattern: 'dist/**/*.js', included: false, served: true},
-			{pattern: 'dist/**/*.png', included: false, served: true},
-			{pattern: 'spec/setup.js', type: 'module'},
-			{pattern: 'spec/suites/**/*.js', type: 'module'},
-			{pattern: 'dist/*.css', type: 'css'},
-		],
-		reporters: ['progress', 'time-stats'],
-		coverageReporter: {
-			dir: 'coverage/',
-			reporters: [
-				{type: 'html', subdir: 'html'},
-				{type: 'text-summary'}
-			]
+			'karma-safari-launcher',
+			'karma-firefox-launcher'],
+
+		// frameworks to use
+		frameworks: ['mocha', 'sinon', 'expect'],
+
+		// list of files / patterns to load in the browser
+		files: files,
+		proxies: {
+			'/base/dist/images/': 'dist/images/'
 		},
-		timeStatsReporter: {
-			reportTimeStats: false,
-			longestTestsCount: 10
+		exclude: [],
+
+		// Rollup the ES6 Leaflet sources into just one file, before tests
+		preprocessors: preprocessors,
+		rollupPreprocessor: {
+			plugins: [
+				json()
+			],
+			output: {
+				format: 'umd',
+				name: 'L',
+				outro: outro,
+				legacy: true, // Needed to create files loadable by IE8
+				freeze: false,
+			},
 		},
+
+		// test results reporter to use
+		// possible values: 'dots', 'progress', 'junit', 'growl', 'coverage'
+		// reporters: ['dots'],
+
+		// web server port
+		port: 9876,
+
+		// level of logging
+		// possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
 		logLevel: config.LOG_WARN,
-		browsers: ['Chrome'],
+
+		// enable / disable colors in the output (reporters and logs)
+		colors: true,
+
+		// enable / disable watching file and executing tests whenever any file changes
+		autoWatch: false,
+
+		// Start these browsers, currently available:
+		// - Chrome
+		// - ChromeCanary
+		// - Firefox
+		// - Opera
+		// - Safari (only Mac)
+		// - PhantomJS
+		// - IE (only Windows)
+		browsers: ['PhantomJSCustom'],
+
 		customLaunchers: {
-			'Chrome': {
-				base: 'ChromeHeadless'
+			'Chrome1280x1024': {
+				base: 'ChromeHeadless',
+				// increased viewport is required for some tests (TODO fix tests)
+				// https://github.com/Leaflet/Leaflet/issues/7113#issuecomment-619528577
+				flags: ['--window-size=1280,1024']
 			},
-			'Firefox': {
+			'FirefoxPointer': {
 				base: 'FirefoxHeadless',
-				prefs: {
-					'dom.w3c_touch_events.enabled': 1
-				}
-			},
-			'FirefoxNoTouch': {
-				base: 'FirefoxHeadless',
-				prefs: {
+			        prefs: {
+					'dom.w3c_pointer_events.enabled': true,
 					'dom.w3c_touch_events.enabled': 0
-				}
+			        }
 			},
-			'FirefoxRetina': {
+			'FirefoxTouch': {
 				base: 'FirefoxHeadless',
-				prefs: {
-					'layout.css.devPixelsPerPx': 2
+			        prefs: {
+					'dom.w3c_pointer_events.enabled': false,
+					'dom.w3c_touch_events.enabled': 1
+			        }
+			},
+			'FirefoxPointerTouch': {
+				base: 'FirefoxHeadless',
+			        prefs: {
+					'dom.w3c_pointer_events.enabled': true,
+					'dom.w3c_touch_events.enabled': 1
+			        }
+			},
+			'PhantomJSCustom': {
+				base: 'PhantomJS',
+				flags: ['--load-images=true'],
+				options: {
+					onCallback: function (data) {
+						if (data.render) {
+							page.render(data.render);
+						}
+					}
 				}
 			}
 		},
+
 		concurrency: 1,
-		browserConsoleLogOptions: {level: 'error'},
-		client: {
-			mocha: {
-				// eslint-disable-next-line no-undef
-				forbidOnly: process.env.CI || false
-			}
-		}
-	};
 
-	if (isCoverageEnabled) {
-		karmaConfig.plugins.push('karma-coverage');
-		karmaConfig.reporters.push('coverage');
-		karmaConfig.preprocessors = {
-			'dist/leaflet-src.esm.js': 'coverage'
-		};
-	}
+		// If browser does not capture in given timeout [ms], kill it
+		captureTimeout: 10000,
 
-	config.set(karmaConfig);
+		// Workaround for PhantomJS random DISCONNECTED error
+		browserDisconnectTimeout: 10000, // default 2000
+		browserDisconnectTolerance: 1, // default 0
+
+		// Continuous Integration mode
+		// if true, it capture browsers, run tests and exit
+		singleRun: true
+	});
 };

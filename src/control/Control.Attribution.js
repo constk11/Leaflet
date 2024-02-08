@@ -1,12 +1,9 @@
 
-import {Control} from './Control.js';
-import {Map} from '../map/Map.js';
-import * as Util from '../core/Util.js';
-import * as DomEvent from '../dom/DomEvent.js';
-import * as DomUtil from '../dom/DomUtil.js';
-
-const ukrainianFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="12" height="8" viewBox="0 0 12 8" class="leaflet-attribution-flag"><path fill="#4C7BE1" d="M0 0h12v4H0z"/><path fill="#FFD500" d="M0 4h12v3H0z"/><path fill="#E0BC00" d="M0 7h12v1H0z"/></svg>';
-
+import {Control} from './Control';
+import {Map} from '../map/Map';
+import * as Util from '../core/Util';
+import * as DomEvent from '../dom/DomEvent';
+import * as DomUtil from '../dom/DomUtil';
 
 /*
  * @class Control.Attribution
@@ -16,33 +13,30 @@ const ukrainianFlag = '<svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg
  * The attribution control allows you to display attribution data in a small text box on a map. It is put on the map by default unless you set its [`attributionControl` option](#map-attributioncontrol) to `false`, and it fetches attribution texts from layers with the [`getAttribution` method](#layer-getattribution) automatically. Extends Control.
  */
 
-export const Attribution = Control.extend({
+export var Attribution = Control.extend({
 	// @section
 	// @aka Control.Attribution options
 	options: {
-		// @option position: String = 'bottomright'
-		// The position of the control (one of the map corners). Possible values are `'topleft'`,
-		// `'topright'`, `'bottomleft'` or `'bottomright'`
 		position: 'bottomright',
 
-		// @option prefix: String|false = 'Leaflet'
+		// @option prefix: String = 'Leaflet'
 		// The HTML text shown before the attributions. Pass `false` to disable.
-		prefix: `<a href="https://leafletjs.com" title="A JavaScript library for interactive maps">${ukrainianFlag} Leaflet</a>`
+		prefix: '<a href="https://leafletjs.com" title="A JS library for interactive maps">Leaflet</a>'
 	},
 
-	initialize(options) {
+	initialize: function (options) {
 		Util.setOptions(this, options);
 
 		this._attributions = {};
 	},
 
-	onAdd(map) {
+	onAdd: function (map) {
 		map.attributionControl = this;
 		this._container = DomUtil.create('div', 'leaflet-control-attribution');
 		DomEvent.disableClickPropagation(this._container);
 
 		// TODO ugly, refactor
-		for (const i in map._layers) {
+		for (var i in map._layers) {
 			if (map._layers[i].getAttribution) {
 				this.addAttribution(map._layers[i].getAttribution());
 			}
@@ -50,35 +44,20 @@ export const Attribution = Control.extend({
 
 		this._update();
 
-		map.on('layeradd', this._addAttribution, this);
-
 		return this._container;
 	},
 
-	onRemove(map) {
-		map.off('layeradd', this._addAttribution, this);
-	},
-
-	_addAttribution(ev) {
-		if (ev.layer.getAttribution) {
-			this.addAttribution(ev.layer.getAttribution());
-			ev.layer.once('remove', function () {
-				this.removeAttribution(ev.layer.getAttribution());
-			}, this);
-		}
-	},
-
-	// @method setPrefix(prefix: String|false): this
-	// The HTML text shown before the attributions. Pass `false` to disable.
-	setPrefix(prefix) {
+	// @method setPrefix(prefix: String): this
+	// Sets the text before the attributions.
+	setPrefix: function (prefix) {
 		this.options.prefix = prefix;
 		this._update();
 		return this;
 	},
 
 	// @method addAttribution(text: String): this
-	// Adds an attribution text (e.g. `'&copy; OpenStreetMap contributors'`).
-	addAttribution(text) {
+	// Adds an attribution text (e.g. `'Vector data &copy; Mapbox'`).
+	addAttribution: function (text) {
 		if (!text) { return this; }
 
 		if (!this._attributions[text]) {
@@ -93,7 +72,7 @@ export const Attribution = Control.extend({
 
 	// @method removeAttribution(text: String): this
 	// Removes an attribution text.
-	removeAttribution(text) {
+	removeAttribution: function (text) {
 		if (!text) { return this; }
 
 		if (this._attributions[text]) {
@@ -104,18 +83,18 @@ export const Attribution = Control.extend({
 		return this;
 	},
 
-	_update() {
+	_update: function () {
 		if (!this._map) { return; }
 
-		const attribs = [];
+		var attribs = [];
 
-		for (const i in this._attributions) {
+		for (var i in this._attributions) {
 			if (this._attributions[i]) {
 				attribs.push(i);
 			}
 		}
 
-		const prefixAndAttribs = [];
+		var prefixAndAttribs = [];
 
 		if (this.options.prefix) {
 			prefixAndAttribs.push(this.options.prefix);
@@ -124,7 +103,7 @@ export const Attribution = Control.extend({
 			prefixAndAttribs.push(attribs.join(', '));
 		}
 
-		this._container.innerHTML = prefixAndAttribs.join(' <span aria-hidden="true">|</span> ');
+		this._container.innerHTML = prefixAndAttribs.join(' | ');
 	}
 });
 
@@ -145,6 +124,6 @@ Map.addInitHook(function () {
 // @namespace Control.Attribution
 // @factory L.control.attribution(options: Control.Attribution options)
 // Creates an attribution control.
-export const attribution = function (options) {
+export var attribution = function (options) {
 	return new Attribution(options);
 };

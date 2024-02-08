@@ -5,14 +5,19 @@ title: GeoJSON tutorial
 <script src="sample-geojson.js" type="text/javascript"></script>
 
 <script>
-	const map = L.map('map').setView([39.74739, -105], 13);
+	var map = L.map('map').setView([39.74739, -105], 13);
 
-	const tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
-		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=pk.eyJ1IjoibWFwYm94IiwiYSI6ImNpejY4NXVycTA2emYycXBndHRqcmZ3N3gifQ.rJcFIG214AriISLbB6B5aw', {
+		maxZoom: 18,
+		attribution: 'Map data &copy; <a href="https://www.openstreetmap.org/">OpenStreetMap</a> contributors, ' +
+			'<a href="https://creativecommons.org/licenses/by-sa/2.0/">CC-BY-SA</a>, ' +
+			'Imagery © <a href="https://www.mapbox.com/">Mapbox</a>',
+		id: 'mapbox/light-v9',
+		tileSize: 512,
+		zoomOffset: -1
 	}).addTo(map);
 
-	const baseballIcon = L.icon({
+	var baseballIcon = L.icon({
 		iconUrl: 'baseball-marker.png',
 		iconSize: [32, 37],
 		iconAnchor: [16, 37],
@@ -20,7 +25,8 @@ title: GeoJSON tutorial
 	});
 
 	function onEachFeature(feature, layer) {
-		let popupContent = `<p>I started out as a GeoJSON ${feature.geometry.type}, but now I'm a Leaflet vector!</p>`;
+		var popupContent = "<p>I started out as a GeoJSON " +
+				feature.geometry.type + ", but now I'm a Leaflet vector!</p>";
 
 		if (feature.properties && feature.properties.popupContent) {
 			popupContent += feature.properties.popupContent;
@@ -29,20 +35,19 @@ title: GeoJSON tutorial
 		layer.bindPopup(popupContent);
 	}
 
-	/* global campus, bicycleRental, freeBus, coorsField */
-	const bicycleRentalLayer = L.geoJSON([bicycleRental, campus], {
+	L.geoJSON([bicycleRental, campus], {
 
-		style(feature) {
+		style: function (feature) {
 			return feature.properties && feature.properties.style;
 		},
 
-		onEachFeature,
+		onEachFeature: onEachFeature,
 
-		pointToLayer(feature, latlng) {
+		pointToLayer: function (feature, latlng) {
 			return L.circleMarker(latlng, {
 				radius: 8,
-				fillColor: '#ff7800',
-				color: '#000',
+				fillColor: "#ff7800",
+				color: "#000",
 				weight: 1,
 				opacity: 1,
 				fillOpacity: 0.8
@@ -50,9 +55,9 @@ title: GeoJSON tutorial
 		}
 	}).addTo(map);
 
-	const freeBusLayer = L.geoJSON(freeBus, {
+	L.geoJSON(freeBus, {
 
-		filter(feature, layer) {
+		filter: function (feature, layer) {
 			if (feature.properties) {
 				// If the property "underConstruction" exists and is true, return false (don't render features under construction)
 				return feature.properties.underConstruction !== undefined ? !feature.properties.underConstruction : true;
@@ -60,16 +65,16 @@ title: GeoJSON tutorial
 			return false;
 		},
 
-		onEachFeature
+		onEachFeature: onEachFeature
 	}).addTo(map);
 
-	const coorsLayer = L.geoJSON(coorsField, {
+	var coorsLayer = L.geoJSON(coorsField, {
 
-		pointToLayer(feature, latlng) {
+		pointToLayer: function (feature, latlng) {
 			return L.marker(latlng, {icon: baseballIcon});
 		},
 
-		onEachFeature
+		onEachFeature: onEachFeature
 	}).addTo(map);
 
 </script>

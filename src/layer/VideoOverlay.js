@@ -1,6 +1,6 @@
-import {ImageOverlay} from './ImageOverlay.js';
-import * as DomUtil from '../dom/DomUtil.js';
-import * as Util from '../core/Util.js';
+import {ImageOverlay} from './ImageOverlay';
+import * as DomUtil from '../dom/DomUtil';
+import * as Util from '../core/Util';
 
 /*
  * @class VideoOverlay
@@ -10,7 +10,7 @@ import * as Util from '../core/Util.js';
  * Used to load and display a video player over specific bounds of the map. Extends `ImageOverlay`.
  *
  * A video overlay uses the [`<video>`](https://developer.mozilla.org/docs/Web/HTML/Element/video)
- * HTML element.
+ * HTML5 element.
  *
  * @example
  *
@@ -21,14 +21,13 @@ import * as Util from '../core/Util.js';
  * ```
  */
 
-export const VideoOverlay = ImageOverlay.extend({
+export var VideoOverlay = ImageOverlay.extend({
 
 	// @section
 	// @aka VideoOverlay options
 	options: {
 		// @option autoplay: Boolean = true
 		// Whether the video starts playing automatically when loaded.
-		// On some browsers autoplay will only work with `muted: true`
 		autoplay: true,
 
 		// @option loop: Boolean = true
@@ -37,37 +36,33 @@ export const VideoOverlay = ImageOverlay.extend({
 
 		// @option keepAspectRatio: Boolean = true
 		// Whether the video will save aspect ratio after the projection.
-		// Relevant for supported browsers. See [browser compatibility](https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit)
+		// Relevant for supported browsers. Browser compatibility- https://developer.mozilla.org/en-US/docs/Web/CSS/object-fit
 		keepAspectRatio: true,
 
 		// @option muted: Boolean = false
 		// Whether the video starts on mute when loaded.
-		muted: false,
-
-		// @option playsInline: Boolean = true
-		// Mobile browsers will play the video right where it is instead of open it up in fullscreen mode.
-		playsInline: true
+		muted: false
 	},
 
-	_initImage() {
-		const wasElementSupplied = this._url.tagName === 'VIDEO';
-		const vid = this._image = wasElementSupplied ? this._url : DomUtil.create('video');
+	_initImage: function () {
+		var wasElementSupplied = this._url.tagName === 'VIDEO';
+		var vid = this._image = wasElementSupplied ? this._url : DomUtil.create('video');
 
-		vid.classList.add('leaflet-image-layer');
-		if (this._zoomAnimated) { vid.classList.add('leaflet-zoom-animated'); }
-		if (this.options.className) { vid.classList.add(...Util.splitWords(this.options.className)); }
+		DomUtil.addClass(vid, 'leaflet-image-layer');
+		if (this._zoomAnimated) { DomUtil.addClass(vid, 'leaflet-zoom-animated'); }
+		if (this.options.className) { DomUtil.addClass(vid, this.options.className); }
 
 		vid.onselectstart = Util.falseFn;
 		vid.onmousemove = Util.falseFn;
 
 		// @event load: Event
 		// Fired when the video has finished loading the first frame
-		vid.onloadeddata = this.fire.bind(this, 'load');
+		vid.onloadeddata = Util.bind(this.fire, this, 'load');
 
 		if (wasElementSupplied) {
-			const sourceElements = vid.getElementsByTagName('source');
-			const sources = [];
-			for (let j = 0; j < sourceElements.length; j++) {
+			var sourceElements = vid.getElementsByTagName('source');
+			var sources = [];
+			for (var j = 0; j < sourceElements.length; j++) {
 				sources.push(sourceElements[j].src);
 			}
 
@@ -75,17 +70,16 @@ export const VideoOverlay = ImageOverlay.extend({
 			return;
 		}
 
-		if (!Array.isArray(this._url)) { this._url = [this._url]; }
+		if (!Util.isArray(this._url)) { this._url = [this._url]; }
 
-		if (!this.options.keepAspectRatio && Object.hasOwn(vid.style, 'objectFit')) {
+		if (!this.options.keepAspectRatio && Object.prototype.hasOwnProperty.call(vid.style, 'objectFit')) {
 			vid.style['objectFit'] = 'fill';
 		}
 		vid.autoplay = !!this.options.autoplay;
 		vid.loop = !!this.options.loop;
 		vid.muted = !!this.options.muted;
-		vid.playsInline = !!this.options.playsInline;
-		for (let i = 0; i < this._url.length; i++) {
-			const source = DomUtil.create('source');
+		for (var i = 0; i < this._url.length; i++) {
+			var source = DomUtil.create('source');
 			source.src = this._url[i];
 			vid.appendChild(source);
 		}

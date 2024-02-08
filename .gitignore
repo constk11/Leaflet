@@ -11,8 +11,10 @@ dist/reference.html
 coverage/
 *.js.html
 .mailmap
+bower.json
 component.json
 debug/local/
+Gemfile.lock
+package-lock.json
 yarn.lock
 *.log
-.eslintcache

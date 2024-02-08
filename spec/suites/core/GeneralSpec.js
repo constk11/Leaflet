@@ -1,8 +1,15 @@
-/* global L */
-import 'leaflet';
+describe('General', function () {
+	describe('noConflict', function () {
+		var leaflet = L;
 
-describe('General', () => {
-	it('namespace extension', () => {
+		after(function () {
+			L = leaflet;
+		});
+
+		expect(L.noConflict()).to.eql(leaflet);
+	});
+
+	describe('namespace extension', function () {
 		L.Util.foo = 'bar';
 		L.Foo = 'Bar';
 

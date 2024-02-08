@@ -1,11 +1,9 @@
-import {Layer} from '../Layer.js';
-import {IconDefault} from './Icon.Default.js';
-import * as Util from '../../core/Util.js';
-import {toLatLng as latLng} from '../../geo/LatLng.js';
-import {toPoint as point} from '../../geometry/Point.js';
-import * as DomUtil from '../../dom/DomUtil.js';
-import * as DomEvent from '../../dom/DomEvent.js';
-import {MarkerDrag} from './Marker.Drag.js';
+import {Layer} from '../Layer';
+import {IconDefault} from './Icon.Default';
+import * as Util from '../../core/Util';
+import {toLatLng as latLng} from '../../geo/LatLng';
+import * as DomUtil from '../../dom/DomUtil';
+import {MarkerDrag} from './Marker.Drag';
 
 /*
  * @class Marker
@@ -20,7 +18,7 @@ import {MarkerDrag} from './Marker.Drag.js';
  * ```
  */
 
-export const Marker = Layer.extend({
+export var Marker = Layer.extend({
 
 	// @section
 	// @aka Marker options
@@ -40,13 +38,11 @@ export const Marker = Layer.extend({
 
 		// @option title: String = ''
 		// Text for the browser tooltip that appear on marker hover (no tooltip by default).
-		// [Useful for accessibility](https://leafletjs.com/examples/accessibility/#markers-must-be-labelled).
 		title: '',
 
-		// @option alt: String = 'Marker'
-		// Text for the `alt` attribute of the icon image.
-		// [Useful for accessibility](https://leafletjs.com/examples/accessibility/#markers-must-be-labelled).
-		alt: 'Marker',
+		// @option alt: String = ''
+		// Text for the `alt` attribute of the icon image (useful for accessibility).
+		alt: '',
 
 		// @option zIndexOffset: Number = 0
 		// By default, marker images zIndex is set automatically based on its latitude. Use this option if you want to put the marker on top of all others (or below), specifying a high value like `1000` (or high negative value, respectively).
@@ -77,12 +73,6 @@ export const Marker = Layer.extend({
 		// (unless [`L.DomEvent.stopPropagation`](#domevent-stoppropagation) is used).
 		bubblingMouseEvents: false,
 
-		// @option autoPanOnFocus: Boolean = true
-		// When `true`, the map will pan whenever the marker is focused (via
-		// e.g. pressing `tab` on the keyboard) to ensure the marker is
-		// visible within the map's bounds
-		autoPanOnFocus: true,
-
 		// @section Draggable marker options
 		// @option draggable: Boolean = false
 		// Whether the marker is draggable with mouse/touch or not.
@@ -107,12 +97,12 @@ export const Marker = Layer.extend({
 	 * In addition to [shared layer methods](#Layer) like `addTo()` and `remove()` and [popup methods](#Popup) like bindPopup() you can also use the following methods:
 	 */
 
-	initialize(latlng, options) {
+	initialize: function (latlng, options) {
 		Util.setOptions(this, options);
 		this._latlng = latLng(latlng);
 	},
 
-	onAdd(map) {
+	onAdd: function (map) {
 		this._zoomAnimated = this._zoomAnimated && map.options.markerZoomAnimation;
 
 		if (this._zoomAnimated) {
@@ -123,7 +113,7 @@ export const Marker = Layer.extend({
 		this.update();
 	},
 
-	onRemove(map) {
+	onRemove: function (map) {
 		if (this.dragging && this.dragging.enabled()) {
 			this.options.draggable = true;
 			this.dragging.removeHooks();
@@ -138,7 +128,7 @@ export const Marker = Layer.extend({
 		this._removeShadow();
 	},
 
-	getEvents() {
+	getEvents: function () {
 		return {
 			zoom: this.update,
 			viewreset: this.update
@@ -147,38 +137,38 @@ export const Marker = Layer.extend({
 
 	// @method getLatLng: LatLng
 	// Returns the current geographical position of the marker.
-	getLatLng() {
+	getLatLng: function () {
 		return this._latlng;
 	},
 
 	// @method setLatLng(latlng: LatLng): this
 	// Changes the marker position to the given point.
-	setLatLng(latlng) {
-		const oldLatLng = this._latlng;
+	setLatLng: function (latlng) {
+		var oldLatLng = this._latlng;
 		this._latlng = latLng(latlng);
 		this.update();
 
 		// @event move: Event
 		// Fired when the marker is moved via [`setLatLng`](#marker-setlatlng) or by [dragging](#marker-dragging). Old and new coordinates are included in event arguments as `oldLatLng`, `latlng`.
-		return this.fire('move', {oldLatLng, latlng: this._latlng});
+		return this.fire('move', {oldLatLng: oldLatLng, latlng: this._latlng});
 	},
 
 	// @method setZIndexOffset(offset: Number): this
 	// Changes the [zIndex offset](#marker-zindexoffset) of the marker.
-	setZIndexOffset(offset) {
+	setZIndexOffset: function (offset) {
 		this.options.zIndexOffset = offset;
 		return this.update();
 	},
 
 	// @method getIcon: Icon
 	// Returns the current icon used by the marker
-	getIcon() {
+	getIcon: function () {
 		return this.options.icon;
 	},
 
 	// @method setIcon(icon: Icon): this
 	// Changes the marker icon.
-	setIcon(icon) {
+	setIcon: function (icon) {
 
 		this.options.icon = icon;
 
@@ -194,26 +184,26 @@ export const Marker = Layer.extend({
 		return this;
 	},
 
-	getElement() {
+	getElement: function () {
 		return this._icon;
 	},
 
-	update() {
+	update: function () {
 
 		if (this._icon && this._map) {
-			const pos = this._map.latLngToLayerPoint(this._latlng).round();
+			var pos = this._map.latLngToLayerPoint(this._latlng).round();
 			this._setPos(pos);
 		}
 
 		return this;
 	},
 
-	_initIcon() {
-		const options = this.options,
-		    classToAdd = `leaflet-zoom-${this._zoomAnimated ? 'animated' : 'hide'}`;
+	_initIcon: function () {
+		var options = this.options,
+		    classToAdd = 'leaflet-zoom-' + (this._zoomAnimated ? 'animated' : 'hide');
 
-		const icon = options.icon.createIcon(this._icon);
-		let addIcon = false;
+		var icon = options.icon.createIcon(this._icon),
+		    addIcon = false;
 
 		// if we're not reusing the icon, remove the old one and init new one
 		if (icon !== this._icon) {
@@ -231,11 +221,10 @@ export const Marker = Layer.extend({
 			}
 		}
 
-		icon.classList.add(classToAdd);
+		DomUtil.addClass(icon, classToAdd);
 
 		if (options.keyboard) {
 			icon.tabIndex = '0';
-			icon.setAttribute('role', 'button');
 		}
 
 		this._icon = icon;
@@ -247,12 +236,8 @@ export const Marker = Layer.extend({
 			});
 		}
 
-		if (this.options.autoPanOnFocus) {
-			DomEvent.on(icon, 'focus', this._panOnFocus, this);
-		}
-
-		const newShadow = options.icon.createShadow(this._shadow);
-		let addShadow = false;
+		var newShadow = options.icon.createShadow(this._shadow),
+		    addShadow = false;
 
 		if (newShadow !== this._shadow) {
 			this._removeShadow();
@@ -260,7 +245,7 @@ export const Marker = Layer.extend({
 		}
 
 		if (newShadow) {
-			newShadow.classList.add(classToAdd);
+			DomUtil.addClass(newShadow, classToAdd);
 			newShadow.alt = '';
 		}
 		this._shadow = newShadow;
@@ -280,7 +265,7 @@ export const Marker = Layer.extend({
 		}
 	},
 
-	_removeIcon() {
+	_removeIcon: function () {
 		if (this.options.riseOnHover) {
 			this.off({
 				mouseover: this._bringToFront,
@@ -288,24 +273,20 @@ export const Marker = Layer.extend({
 			});
 		}
 
-		if (this.options.autoPanOnFocus) {
-			DomEvent.off(this._icon, 'focus', this._panOnFocus, this);
-		}
-
-		this._icon.remove();
+		DomUtil.remove(this._icon);
 		this.removeInteractiveTarget(this._icon);
 
 		this._icon = null;
 	},
 
-	_removeShadow() {
+	_removeShadow: function () {
 		if (this._shadow) {
-			this._shadow.remove();
+			DomUtil.remove(this._shadow);
 		}
 		this._shadow = null;
 	},
 
-	_setPos(pos) {
+	_setPos: function (pos) {
 
 		if (this._icon) {
 			DomUtil.setPosition(this._icon, pos);
@@ -320,28 +301,28 @@ export const Marker = Layer.extend({
 		this._resetZIndex();
 	},
 
-	_updateZIndex(offset) {
+	_updateZIndex: function (offset) {
 		if (this._icon) {
 			this._icon.style.zIndex = this._zIndex + offset;
 		}
 	},
 
-	_animateZoom(opt) {
-		const pos = this._map._latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center).round();
+	_animateZoom: function (opt) {
+		var pos = this._map._latLngToNewLayerPoint(this._latlng, opt.zoom, opt.center).round();
 
 		this._setPos(pos);
 	},
 
-	_initInteraction() {
+	_initInteraction: function () {
 
 		if (!this.options.interactive) { return; }
 
-		this._icon.classList.add('leaflet-interactive');
+		DomUtil.addClass(this._icon, 'leaflet-interactive');
 
 		this.addInteractiveTarget(this._icon);
 
 		if (MarkerDrag) {
-			let draggable = this.options.draggable;
+			var draggable = this.options.draggable;
 			if (this.dragging) {
 				draggable = this.dragging.enabled();
 				this.dragging.disable();
@@ -357,7 +338,7 @@ export const Marker = Layer.extend({
 
 	// @method setOpacity(opacity: Number): this
 	// Changes the opacity of the marker.
-	setOpacity(opacity) {
+	setOpacity: function (opacity) {
 		this.options.opacity = opacity;
 		if (this._map) {
 			this._updateOpacity();
@@ -366,45 +347,31 @@ export const Marker = Layer.extend({
 		return this;
 	},
 
-	_updateOpacity() {
-		const opacity = this.options.opacity;
+	_updateOpacity: function () {
+		var opacity = this.options.opacity;
 
 		if (this._icon) {
-			this._icon.style.opacity = opacity;
+			DomUtil.setOpacity(this._icon, opacity);
 		}
 
 		if (this._shadow) {
-			this._shadow.style.opacity = opacity;
+			DomUtil.setOpacity(this._shadow, opacity);
 		}
 	},
 
-	_bringToFront() {
+	_bringToFront: function () {
 		this._updateZIndex(this.options.riseOffset);
 	},
 
-	_resetZIndex() {
+	_resetZIndex: function () {
 		this._updateZIndex(0);
 	},
 
-	_panOnFocus() {
-		const map = this._map;
-		if (!map) { return; }
-
-		const iconOpts = this.options.icon.options;
-		const size = iconOpts.iconSize ? point(iconOpts.iconSize) : point(0, 0);
-		const anchor = iconOpts.iconAnchor ? point(iconOpts.iconAnchor) : point(0, 0);
-
-		map.panInside(this._latlng, {
-			paddingTopLeft: anchor,
-			paddingBottomRight: size.subtract(anchor)
-		});
-	},
-
-	_getPopupAnchor() {
+	_getPopupAnchor: function () {
 		return this.options.icon.options.popupAnchor;
 	},
 
-	_getTooltipAnchor() {
+	_getTooltipAnchor: function () {
 		return this.options.icon.options.tooltipAnchor;
 	}
 });

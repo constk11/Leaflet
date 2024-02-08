@@ -31,13 +31,16 @@ The GeoJSON with state shapes was kindly shared by [Mike Bostock](http://bost.oc
 
 ### Basic States Map
 
-Let's display our states data on the map:
+Let's display our states data on a map with a custom Mapbox style for nice grayscale tiles that look perfect as a background for visualizations:
 
+	var mapboxAccessToken = {your access token here};
 	var map = L.map('map').setView([37.8, -96], 4);
 
-	var tiles = L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-		maxZoom: 19,
-		attribution: '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+	L.tileLayer('https://api.mapbox.com/styles/v1/{id}/tiles/{z}/{x}/{y}?access_token=' + mapboxAccessToken, {
+		id: 'mapbox/light-v9',
+		attribution: ...,
+		tileSize: 512,
+		zoomOffset: -1
 	}).addTo(map);
 
 	L.geoJson(statesData).addTo(map);
@@ -94,10 +97,12 @@ Now let's make the states highlighted visually in some way when they are hovered
 			fillOpacity: 0.7
 		});
 
-		layer.bringToFront();
+		if (!L.Browser.ie && !L.Browser.opera && !L.Browser.edge) {
+			layer.bringToFront();
+		}
 	}
 
-Here we get access to the layer that was hovered through `e.target`, set a thick grey border on the layer as our highlight effect, also bringing it to the front so that the border doesn't clash with nearby states.
+Here we get access to the layer that was hovered through `e.target`, set a thick grey border on the layer as our highlight effect, also bringing it to the front so that the border doesn't clash with nearby states (but not for IE, Opera or Edge, since they have problems doing `bringToFront` on `mouseover`).
 
 Next we'll define what happens on `mouseout`:
 
