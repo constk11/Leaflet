@@ -1,5 +1,5 @@
 /* @preserve
- * Leaflet 1.6.0+main.ec57557, a JS library for interactive maps. http://leafletjs.com
+ * Leaflet 1.6.0+main.5a2d28d, a JS library for interactive maps. http://leafletjs.com
  * (c) 2010-2019 Vladimir Agafonkin, (c) 2010-2011 CloudMade
  */
 
@@ -2799,7 +2799,7 @@
   	}
 
   	var scale = getScale(container),
-  	    offset = scale.getBoundingClientRect(); // left and top  values are in page scale (like the event clientX/Y)
+  	    offset = container.getBoundingClientRect(); // left and top  values are in page scale (like the event clientX/Y)
 
   	return new Point(
   		// offset.left/top values are in page scale (like clientX/Y),
