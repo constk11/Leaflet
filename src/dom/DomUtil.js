@@ -348,6 +348,5 @@ export function getScale(element) {
 	return {
 		x: element.clientWidth / element.offsetWidth || 1,
 		y: element.clientHeight / element.offsetHeight || 1,
-		boundingClientRect: rect
 	};
 }
