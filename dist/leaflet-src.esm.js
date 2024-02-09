@@ -1,5 +1,5 @@
 /* @preserve
- * Leaflet 1.6.0+main.4cff532, a JS library for interactive maps. http://leafletjs.com
+ * Leaflet 1.6.0+main.f333fdb, a JS library for interactive maps. http://leafletjs.com
  * (c) 2010-2019 Vladimir Agafonkin, (c) 2010-2011 CloudMade
  */
 
@@ -2328,7 +2328,8 @@ function removeClass(el, name) {
 	if (el.classList !== undefined) {
 		el.classList.remove(name);
 	} else {
-		setClass(el, trim((' ' + getClass(el) + ' ').replace(' ' + name + ' ', ' ')));
+        const classWithoutName = trim((' ' + getClass(el) + ' ').replace(' ' + name + ' ', ' '));
+		setClass(el, classWithoutName);
 	}
 }
 

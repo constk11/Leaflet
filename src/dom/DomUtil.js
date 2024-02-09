@@ -131,7 +131,8 @@ export function removeClass(el, name) {
 	if (el.classList !== undefined) {
 		el.classList.remove(name);
 	} else {
-		setClass(el, Util.trim((' ' + getClass(el) + ' ').replace(' ' + name + ' ', ' ')));
+        const classWithoutName = Util.trim((' ' + getClass(el) + ' ').replace(' ' + name + ' ', ' '));
+		setClass(el, classWithoutName);
 	}
 }
 
