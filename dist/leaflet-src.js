@@ -1,5 +1,5 @@
 /* @preserve
- * Leaflet 1.6.0+main.f333fdb, a JS library for interactive maps. http://leafletjs.com
+ * Leaflet 1.6.0+main.018a66a, a JS library for interactive maps. http://leafletjs.com
  * (c) 2010-2019 Vladimir Agafonkin, (c) 2010-2011 CloudMade
  */
 
@@ -2543,11 +2543,9 @@
   // Returns an object with `x` and `y` members as horizontal and vertical scales respectively,
   // and `boundingClientRect` as the result of [`getBoundingClientRect()`](https://developer.mozilla.org/en-US/docs/Web/API/Element/getBoundingClientRect).
   function getScale(element) {
-  	var rect = element.getBoundingClientRect(); // Read-only in old browsers.
-
   	return {
-  		x: rect.width / element.offsetWidth || 1,
-  		y: rect.height / element.offsetHeight || 1,
+  		x: element.clientWidth / element.offsetWidth || 1,
+  		y: element.clientHeight / element.offsetHeight || 1,
   		boundingClientRect: rect
   	};
   }
