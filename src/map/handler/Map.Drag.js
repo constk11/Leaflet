@@ -81,8 +81,7 @@ export var Drag = Handler.extend({
 	},
 
 	removeHooks: function () {
-		DomUtil.removeClass(this._map._container, 'leaflet-grab');
-		DomUtil.removeClass(this._map._container, 'leaflet-touch-drag');
+		DomUtil.removeClass(this._map._container, 'leaflet-grab', 'leaflet-touch-drag');
 		this._draggable.disable();
 	},
 

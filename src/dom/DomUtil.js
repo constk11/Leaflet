@@ -127,13 +127,18 @@ export function addClass(el, name) {
 
 // @function removeClass(el: HTMLElement, name: String)
 // Removes `name` from the element's class attribute.
-export function removeClass(el, name) {
-	if (el.classList !== undefined) {
-		el.classList.remove(name);
-	} else {
-        const classWithoutName = Util.trim((' ' + getClass(el) + ' ').replace(' ' + name + ' ', ' '));
-		setClass(el, classWithoutName);
-	}
+export function removeClass(el, ...names) {
+    if (el.classList !== undefined) {
+        names.forEach(name => el.classList.remove(name));
+    } else {
+        let classes = getClass(el);
+
+        names.forEach(name => {
+            classes = (' ' + classes + ' ').replace(' ' + name + ' ', ' ');
+        });
+
+        setClass(el, trim(classes));
+    }
 }
 
 // @function setClass(el: HTMLElement, name: String)

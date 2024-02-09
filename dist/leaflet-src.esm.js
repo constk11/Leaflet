@@ -1,5 +1,5 @@
 /* @preserve
- * Leaflet 1.6.0+main.018a66a, a JS library for interactive maps. http://leafletjs.com
+ * Leaflet 1.6.0+main.8d74444, a JS library for interactive maps. http://leafletjs.com
  * (c) 2010-2019 Vladimir Agafonkin, (c) 2010-2011 CloudMade
  */
 
@@ -124,14 +124,14 @@ function formatNum(num, digits) {
 
 // @function trim(str: String): String
 // Compatibility polyfill for [String.prototype.trim](https://developer.mozilla.org/docs/Web/JavaScript/Reference/Global_Objects/String/Trim)
-function trim(str) {
+function trim$1(str) {
 	return str.trim ? str.trim() : str.replace(/^\s+|\s+$/g, '');
 }
 
 // @function splitWords(str: String): String[]
 // Trims and splits the string on whitespace and returns the array of parts.
 function splitWords(str) {
-	return trim(str).split(/\s+/);
+	return trim$1(str).split(/\s+/);
 }
 
 // @function setOptions(obj: Object, options: Object): Object
@@ -254,7 +254,7 @@ var Util = ({
   wrapNum: wrapNum,
   falseFn: falseFn,
   formatNum: formatNum,
-  trim: trim,
+  trim: trim$1,
   splitWords: splitWords,
   setOptions: setOptions,
   getParamString: getParamString,
@@ -2324,13 +2324,18 @@ function addClass(el, name) {
 
 // @function removeClass(el: HTMLElement, name: String)
 // Removes `name` from the element's class attribute.
-function removeClass(el, name) {
-	if (el.classList !== undefined) {
-		el.classList.remove(name);
-	} else {
-        const classWithoutName = trim((' ' + getClass(el) + ' ').replace(' ' + name + ' ', ' '));
-		setClass(el, classWithoutName);
-	}
+function removeClass(el, ...names) {
+    if (el.classList !== undefined) {
+        names.forEach(name => el.classList.remove(name));
+    } else {
+        let classes = getClass(el);
+
+        names.forEach(name => {
+            classes = (' ' + classes + ' ').replace(' ' + name + ' ', ' ');
+        });
+
+        setClass(el, trim(classes));
+    }
 }
 
 // @function setClass(el: HTMLElement, name: String)
@@ -10311,10 +10316,13 @@ var Tooltip = DivOverlay.extend({
 
 		pos = pos.subtract(toPoint(subX, subY, true)).add(offset).add(anchor);
 
-		removeClass(container, 'leaflet-tooltip-right');
-		removeClass(container, 'leaflet-tooltip-left');
-		removeClass(container, 'leaflet-tooltip-top');
-		removeClass(container, 'leaflet-tooltip-bottom');
+		removeClass(
+            container, 
+            'leaflet-tooltip-right', 
+            'leaflet-tooltip-left', 
+            'leaflet-tooltip-top', 
+            'leaflet-tooltip-bottom'
+        );
 		addClass(container, 'leaflet-tooltip-' + direction);
 		setPosition(container, pos);
 	},
@@ -13289,8 +13297,7 @@ var Drag = Handler.extend({
 	},
 
 	removeHooks: function () {
-		removeClass(this._map._container, 'leaflet-grab');
-		removeClass(this._map._container, 'leaflet-touch-drag');
+		removeClass(this._map._container, 'leaflet-grab', 'leaflet-touch-drag');
 		this._draggable.disable();
 	},
 
